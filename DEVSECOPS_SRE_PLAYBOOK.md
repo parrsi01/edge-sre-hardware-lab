@@ -2,6 +2,8 @@
 
 Checked 19 September 2026 (Europe/Zurich). This is the implementation companion to the [SRE beginner PDF](docs/assets/SRE_BEGINNER_GUIDE_IP4IT_GENEVA.pdf) and the public [Edge SRE Hardware Lab](https://github.com/parrsi01/edge-sre-hardware-lab).
 
+For a zero-DevOps starting point, read [PROTON_SRE_GENEVA_BEGINNER_GUIDE.txt](PROTON_SRE_GENEVA_BEGINNER_GUIDE.txt) first, then use the [Proton Geneva companion PDF](docs/assets/PROTON_SRE_GENEVA_BEGINNER_GUIDE.pdf). The text guide defines each component before the role mapping; the PDF is a printable, validity-first version.
+
 ## Executive decision
 
 Build one demonstrable project called **Secure Edge Platform**. It is a small, hardware-aware service that is:
@@ -211,4 +213,3 @@ Primary sources checked 19 September 2026:
 - [ICT workforce requirements through 2033](https://www.ict-berufsbildung.ch/resources/BSS-Schlussbericht-ICT-Bildungsbedarf-2033-2025-09_09.pdf)
 
 Recheck immediately before applying or presenting: vacancy status and deadline, the centre's equipment and supervision, the user's permit/activity authorization, and whether any client work is legally permitted. No application, registration, purchase, message or external system change is performed by this playbook.
-

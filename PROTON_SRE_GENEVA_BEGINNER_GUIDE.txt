@@ -1,0 +1,831 @@
+PROTON SRE IN GENEVA - BEGINNER GUIDE
+=====================================
+
+Checked: 19 September 2026 (Europe/Zurich)
+Audience: a computer-science graduate who is new to DevOps and SRE
+Purpose: understand the basic ideas, then connect them to Proton's Geneva SRE roles
+
+READ THIS FIRST
+---------------
+
+This is a learning guide, not a statement that you are already qualified for a Proton
+SRE position. Proton's official Infrastructure Systems description asks for Kubernetes,
+VM orchestration, bare-metal provisioning, Linux internals and networking, Python,
+Terraform/Ansible/Puppet, highly available distributed architecture, Prometheus/Grafana
+and infrastructure security. It describes a global production environment, on-call
+work and a 99.95%+ uptime objective. Those are employer requirements and context, not
+skills created by reading this file.
+
+Your current public lab demonstrates a much smaller local system: C++ device simulator,
+Python/FastAPI control plane, Docker Compose, Prometheus, Grafana, GitHub Actions and a
+controlled fault/recovery drill. It does not yet prove production Kubernetes, VMware,
+bare-metal fleet work, Proton internal systems, on-call experience or Swiss work
+authorization.
+
+The correct goal is:
+
+    understand the vocabulary -> operate a small service -> practise safely ->
+    obtain supervised Linux/Kubernetes evidence -> apply truthfully
+
+TABLE OF CONTENTS
+-----------------
+
+1. What SRE means
+2. DevOps, DevSecOps and platform engineering
+3. The service model
+4. Reliability vocabulary
+5. Observability
+6. Incidents and operations
+7. Linux and networking foundations
+8. Containers and Docker
+9. Kubernetes from zero
+10. Virtual machines and VMware
+11. Infrastructure as Code and configuration management
+12. CI/CD and GitOps
+13. Security in the delivery cycle
+14. Proton Geneva: what the role actually involves
+15. The current lab mapped to Proton
+16. A sensible six-week learning plan
+17. What can become paid work
+18. Beginner exercises with answers
+19. First session checklist
+20. Sources and validity boundaries
+
+
+1. WHAT SRE MEANS
+------------------
+
+SRE stands for Site Reliability Engineering. It is a way of applying software
+engineering to the operation of services.
+
+An SRE does not only ask, "Does the code run?" An SRE also asks:
+
+- Can the user complete the important action?
+- How often does the service fail?
+- How quickly can we detect and recover from failure?
+- What evidence tells us what happened?
+- Which repeated manual task should become safe automation?
+- How much change can the service accept before reliability risk is too high?
+
+SRE has three connected parts:
+
+1. Service design: make failure visible, bounded and recoverable.
+2. Service operation: measure, alert, diagnose and restore.
+3. Service improvement: automate toil, test changes and learn from incidents.
+
+SRE is not a synonym for:
+
+- system administration alone;
+- writing a Dockerfile alone;
+- installing Kubernetes;
+- monitoring without responding;
+- promising 100% uptime;
+- calling a six-week project production experience.
+
+Simple example:
+
+    A web API depends on a database.
+    The database becomes unavailable.
+    Liveness may still be healthy because the API process is running.
+    Readiness should fail because the API cannot perform its useful work.
+    Monitoring detects the change.
+    The runbook explains what to inspect.
+    The operator restores the dependency and verifies a new successful request.
+
+That sequence is SRE thinking.
+
+
+2. DEVOPS, DEVSECOPS AND PLATFORM ENGINEERING
+-----------------------------------------------
+
+DevOps is a working culture and set of practices that reduce the gap between building
+software and operating it. It encourages shared ownership, automation, small changes,
+feedback and repeatable delivery.
+
+DevSecOps means security is included in the same delivery cycle instead of being left
+until the end. Examples:
+
+- dependencies are checked before release;
+- container images are scanned and kept minimal;
+- secrets are not committed to Git;
+- services use least-privilege identities;
+- access and network paths are restricted;
+- logs and alerts help detect abuse and faults;
+- recovery and patching are tested.
+
+Platform engineering creates reusable internal paths for developers and operators.
+Instead of every team inventing deployment, identity, logging and alerting, a platform
+team provides a safer standard path.
+
+The distinction is useful:
+
+- DevOps: how development and operations work together.
+- DevSecOps: how security controls are embedded in that workflow.
+- SRE: how reliability is defined, measured and improved.
+- Platform engineering: how reusable infrastructure paths are provided.
+
+One project can demonstrate all four, but a project title does not prove seniority.
+
+
+3. THE SERVICE MODEL
+--------------------
+
+A service is a system that provides a useful function to a user or another service.
+
+Important components:
+
+- Client: the caller, browser, job or service sending a request.
+- API: the agreed interface for requests and responses.
+- Process: a running program.
+- Host: a computer or virtual machine running programs.
+- Dependency: another component needed for useful work.
+- State: information that must persist or be coordinated.
+- Network path: the route and protocols between components.
+- Deployment: the version and configuration running in an environment.
+- Environment: a boundary such as development, test, staging or production.
+
+Think in boundaries. For a Proton-style service, the path might contain:
+
+    user traffic -> DNS -> load balancer/proxy -> application -> data store
+                                  |
+                                  +-> metrics/logs/alerts
+
+Every arrow can fail. An SRE makes the failure detectable and the recovery decision
+understandable.
+
+The four questions for every component are:
+
+1. What does it do?
+2. What does it depend on?
+3. How do we know it is healthy?
+4. What is the safe recovery action?
+
+
+4. RELIABILITY VOCABULARY
+-------------------------
+
+Availability: the proportion of intended service that is usable. A request-based
+example is successful requests divided by total valid requests in a stated window.
+
+Reliability: the probability that a service performs its intended function for a
+stated period and conditions. Availability is one observable part of reliability.
+
+Latency: the time taken to complete an operation. Always state a percentile or other
+summary and the measured operation; "fast" is not a metric.
+
+Throughput: work completed per unit of time, such as requests per second.
+
+Scalability: how capacity and performance change as demand or resources change.
+
+Durability: how well data survives failures. Durability is not the same as availability.
+
+Resilience: the ability to continue or recover when components fail.
+
+Fault: a condition that can cause incorrect or degraded behaviour.
+
+Failure: the service does not perform the intended function.
+
+Degradation: the service still works but with reduced quality, capacity or speed.
+
+SLI (Service Level Indicator): a measurement of a user-relevant outcome.
+
+    Example SLI: successful checkout requests / all valid checkout requests.
+
+SLO (Service Level Objective): the target for an SLI over a defined window.
+
+    Example SLO: at least 99.9% of valid checkout requests succeed over 30 days.
+
+SLA (Service Level Agreement): an external promise, usually with consequences. A
+training lab has no SLA unless a real contract says so.
+
+Error budget: the permitted unreliability under an SLO. A 99% SLO permits 1% of the
+chosen measurement to fail. The budget is not permission to harm users; it is a way to
+balance feature change and reliability risk.
+
+Do not write "99% reliable" without naming the indicator, target and window.
+
+
+5. OBSERVABILITY
+----------------
+
+Observability is the ability to understand internal system state from the information
+the system produces. The main signals are:
+
+Metrics: numeric measurements over time. Examples are request count, error count,
+queue depth, CPU use and request duration.
+
+Logs: timestamped records of events. A useful log says what happened, where, with a
+correlation ID when appropriate, while avoiding secrets and unnecessary personal data.
+
+Traces: a request's path across services, usually represented as spans with timing.
+
+Monitoring: collecting and examining signals.
+
+Alerting: notifying an operator when a condition needs action. An alert should have a
+meaning, owner, urgency and runbook; noisy alerts create toil.
+
+Prometheus: a metrics collection and query system commonly used to scrape endpoints.
+
+Grafana: a dashboard and visualization tool that can query Prometheus and other data.
+
+Alertmanager: a Prometheus companion that groups, routes and suppresses alerts.
+
+ELK: Elasticsearch, Logstash and Kibana, a common log-search and visualization stack.
+Kibana is the user interface; do not treat it as a replacement for metrics or a
+runbook.
+
+Golden signals: latency, traffic, errors and saturation. They are a starting point,
+not a complete observability design.
+
+Good telemetry answers:
+
+1. Is the user-visible function working?
+2. What changed?
+3. Which dependency or layer is failing?
+4. What is the impact and how long has it lasted?
+
+Avoid high-cardinality labels such as unrestricted user IDs. They can make a metrics
+system expensive and unstable.
+
+
+6. INCIDENTS AND OPERATIONS
+---------------------------
+
+Incident: an unplanned event that reduces or threatens a service's expected function.
+
+Outage: a broad or complete loss of a service.
+
+On-call: a defined person or team responsible for responding during a period. On-call
+requires escalation, access, documentation and a healthy handover; it is not merely
+having a phone nearby.
+
+Runbook: step-by-step instructions for a known operational task or failure.
+
+Playbook: a broader response plan with decision branches for a class of incidents.
+
+Root cause: an underlying condition whose removal would prevent the same failure, not
+just the first symptom seen.
+
+RCA (root-cause analysis): the evidence-based investigation of why an incident occurred.
+
+Postmortem: a written record of impact, timeline, detection, response, cause,
+contributing factors and prevention actions. A good postmortem is blameless but not
+responsibility-free.
+
+Safe incident order:
+
+1. Detect and state the user impact.
+2. Declare an incident and assign an owner.
+3. Preserve evidence and avoid unrelated changes.
+4. Contain the impact if possible.
+5. Diagnose from the lowest failing layer upward.
+6. Recover with the smallest safe action.
+7. Verify a fresh user-relevant success.
+8. Record what should change next.
+
+Toil: manual, repetitive, automatable work that scales with service size and provides
+little lasting value. Automate only when the behaviour is understood and the automation
+fails safely.
+
+Idempotence: repeating the same desired-state operation produces the same result. It is
+one reason configuration and deployment automation can be trusted.
+
+
+7. LINUX AND NETWORKING FOUNDATIONS
+------------------------------------
+
+Linux is the operating-system foundation for much of modern infrastructure.
+
+Kernel: the privileged core that manages CPU, memory, devices, processes and system
+calls.
+
+Process: a running program with an identity and resources.
+
+File descriptor: a process handle for a file, socket or other I/O resource.
+
+Permission: the rule controlling who may read, write or execute a resource.
+
+systemd: a common Linux service manager. A unit describes how a service starts, stops,
+restarts and logs.
+
+Namespace: a Linux isolation mechanism that gives a process a restricted view of
+resources such as processes, mounts or networking.
+
+cgroup: a Linux control group used to limit and account for resource use.
+
+TCP: a connection-oriented transport protocol that provides ordered delivery.
+
+IP: the addressing and routing layer for packets.
+
+DNS: translates names such as api.example into addresses or other records.
+
+HTTP/HTTPS: application protocols used for web requests; HTTPS adds TLS encryption and
+authentication of the server when correctly configured.
+
+Port: a numbered endpoint used by a host and protocol. A listening port is not proof
+that the application is healthy.
+
+Route: a rule deciding where packets go next.
+
+Firewall: a control that allows or blocks traffic according to policy.
+
+Useful authorized-lab checks:
+
+    hostnamectl
+    ip address
+    ip route
+    ss -lntp
+    systemctl status SERVICE
+    journalctl -u SERVICE --since '10 minutes ago'
+    curl -i http://127.0.0.1:PORT/healthz
+
+Layered diagnosis:
+
+1. Power/process: is the host and process running?
+2. Interface/address: does the host have the expected address?
+3. Route/firewall: can traffic reach the destination?
+4. TCP: is the port accepting a connection?
+5. TLS/HTTP: does the protocol negotiate and respond?
+6. Application/dependency: can the useful operation succeed?
+
+Do not scan or capture traffic on a network unless the owner explicitly authorizes it.
+
+
+8. CONTAINERS AND DOCKER
+------------------------
+
+Image: an immutable package containing an application and its runtime filesystem.
+
+Container: a process started from an image with isolation and resource controls. It is
+not a miniature VM and does not contain a separate kernel.
+
+Registry: a service that stores and distributes images.
+
+Dockerfile: instructions for building an image.
+
+Docker Compose: a way to describe and run several related containers for development
+or a small lab.
+
+Important Docker practices:
+
+- use a small trusted base image;
+- pin or review versions;
+- run as a non-root user where possible;
+- do not put secrets in the image;
+- expose only required ports;
+- add health checks;
+- make logs go to a standard output path;
+- rebuild and scan after dependency changes;
+- keep the image reproducible.
+
+What Docker does not solve automatically:
+
+- identity and authorization;
+- data backup;
+- network policy;
+- image vulnerabilities;
+- noisy logs;
+- application correctness;
+- production incident response.
+
+
+9. KUBERNETES FROM ZERO
+-----------------------
+
+Kubernetes is a control system for running containerized workloads. You declare a
+desired state and controllers work to make the actual state match it.
+
+Cluster: the Kubernetes control plane plus worker resources.
+
+Node: a machine or VM that runs workloads.
+
+Pod: the smallest deployable unit; usually one main container, sometimes tightly
+coupled sidecars.
+
+Deployment: declares how many versions of a stateless Pod should run and manages
+rollouts and replacement.
+
+Service: gives a stable network identity to a set of Pods.
+
+Ingress: a rule for routing external HTTP(S) traffic to Services. Many installations
+use an ingress controller or a gateway.
+
+ConfigMap: non-secret configuration.
+
+Secret: sensitive configuration, but not automatically safe; access and storage still
+need protection.
+
+Namespace: a logical boundary for names, policy and access.
+
+Readiness probe: asks whether a Pod should receive traffic.
+
+Liveness probe: asks whether a process is alive enough to keep running.
+
+Startup probe: gives a slow-starting application time to initialize before liveness
+checks become strict.
+
+Resource request: amount used for scheduling.
+
+Resource limit: maximum allowed resource use under the configured policy.
+
+RBAC: role-based access control for Kubernetes API permissions.
+
+NetworkPolicy: rules controlling Pod-to-Pod traffic when the network implementation
+supports them.
+
+Helm: a packaging and templating tool for Kubernetes manifests.
+
+GitOps: Git is the reviewed desired-state source; an agent reconciles that state into
+the environment. ArgoCD is a common GitOps controller.
+
+Safe beginner sequence:
+
+1. Deploy one non-production container.
+2. Add readiness and liveness probes.
+3. Add resource requests and limits.
+4. Restrict the namespace and service account.
+5. Add a rollback path.
+6. Observe the deployment and deliberately cause a safe failure.
+
+Do not claim Kubernetes production experience from reading a manifest or running a
+single local cluster.
+
+
+10. VIRTUAL MACHINES AND VMWARE
+------------------------------
+
+Virtual machine (VM): a software-defined computer with virtual CPU, memory, storage
+and network devices.
+
+Hypervisor: software that creates and runs VMs.
+
+VMware and Hyper-V are hypervisor/platform families. QEMU/KVM is a common Linux-based
+virtualization path. OpenStack is a cloud-control platform that can use virtualization
+and other resources.
+
+VM versus container:
+
+- VM: stronger machine boundary, own guest kernel, slower/heavier startup.
+- Container: process isolation, shared host kernel, faster/lighter startup.
+
+SRE questions for a VM:
+
+- What host owns it?
+- What CPU, memory and storage limits apply?
+- How is it patched and backed up?
+- What happens when the host fails?
+- Which network segments can it reach?
+- Who can administer it?
+
+On Apple silicon, the centre must confirm the supported VM architecture and whether
+nested virtualization is allowed. Do not promise that a particular VMware product can
+run the centre's preferred Kubernetes setup until the centre tests it.
+
+
+11. INFRASTRUCTURE AS CODE AND CONFIGURATION MANAGEMENT
+--------------------------------------------------------
+
+Infrastructure as Code (IaC): version-controlled declarations describing infrastructure
+resources such as networks, VMs, storage or managed services.
+
+Terraform/OpenTofu: declarative IaC tools that calculate a plan and apply changes using
+providers.
+
+Configuration management: ensuring machines have the intended packages, files, users
+and services.
+
+Ansible: agentless automation commonly using YAML playbooks and SSH or other connection
+methods.
+
+Puppet/OpenVox: configuration-management systems that enforce declared state through
+agents or compatible workflows.
+
+Plan: a preview of intended infrastructure changes.
+
+Apply: execution of the planned change.
+
+State: the record a tool uses to compare desired and actual resources. Protect it like
+infrastructure information; it can contain sensitive values.
+
+Drift: actual infrastructure differs from the declared state.
+
+Idempotent configuration can be run again without creating uncontrolled duplication.
+
+Beginner rule: practise only on disposable resources. Review the plan. Never paste
+private keys, cloud credentials or real production state into a public repository.
+
+
+12. CI/CD AND GITOPS
+--------------------
+
+Continuous Integration (CI): every reviewed change is built and tested automatically.
+
+Continuous Delivery: changes are kept in a releasable state and can be deployed using
+a controlled process.
+
+Continuous Deployment: a policy where changes passing required gates are deployed
+automatically.
+
+Pipeline: the ordered jobs that build, test, scan, package and release software.
+
+Git: distributed version control. A commit is a recorded change; a pull request is a
+review and discussion boundary.
+
+GitLab CI, GitHub Actions and Jenkins are CI/CD systems. They differ in syntax and
+integration, but the safety questions are the same:
+
+- What triggers the pipeline?
+- Which tests and scans are mandatory?
+- Where are artifacts stored?
+- Who may approve deployment?
+- How is a failed release rolled back?
+
+GitOps adds a reconciliation agent such as ArgoCD. The Git repository is not magically
+secure; branch protection, secret handling, review and least privilege still matter.
+
+
+13. SECURITY IN THE DELIVERY CYCLE
+-----------------------------------
+
+Threat model: a structured description of assets, trust boundaries, attackers,
+abuse paths and mitigations.
+
+Least privilege: each person, process and service gets only the permissions needed.
+
+IAM: identity and access management.
+
+RBAC: permissions expressed through roles instead of ad hoc broad access.
+
+SAST: static application security testing of source or code patterns.
+
+DAST: dynamic testing against a running application in an authorized environment.
+
+Dependency scanning: checks third-party components for known risks and licenses.
+
+Image scanning: checks a container image and its packages for known vulnerabilities.
+
+SBOM: software bill of materials, a machine-readable inventory of included components.
+
+Secret scanning: detects likely passwords, tokens or keys before publication or use.
+
+Supply-chain security: verifying where dependencies and build artifacts came from and
+whether they were altered.
+
+Encryption in transit: protects data while moving, usually with TLS.
+
+Encryption at rest: protects stored data, but does not replace access control or
+backup/recovery design.
+
+DevSecOps gate example:
+
+    source review -> tests -> dependency scan -> image build -> image scan/SBOM ->
+    policy check -> approved non-production deploy -> observability -> release decision
+
+Fail closed means a missing security check blocks the path or creates an explicit,
+reviewed exception. It does not mean pretending the check passed.
+
+
+14. PROTON GENEVA: WHAT THE ROLE ACTUALLY INVOLVES
+---------------------------------------------------
+
+Proton's official Infrastructure Systems role is listed for Geneva and Paris. The
+team provides base platforms including Kubernetes, VM orchestration and bare-metal
+provisioning, plus critical services such as DNS, DHCP, source of truth and monitoring.
+
+The role description says the team operates a rapidly expanding global network of
+thousands of servers and designs automation for 99.95%+ infrastructure uptime. It
+includes on-call troubleshooting across network environments, monitoring/alerting and
+engineering for connectivity, stability, performance, scalability, security and
+resilience.
+
+The requested technical foundations are:
+
+- Linux internals, networking stack and kernel tuning;
+- Kubernetes and infrastructure automation;
+- Terraform, Ansible, Puppet or similar tools;
+- Python for operational automation;
+- highly available and distributed-system architecture;
+- Prometheus and Grafana;
+- infrastructure security;
+- bonus: bare metal, on-premise cloud and open source.
+
+Proton's Application Edge role is a different but related SRE path. It focuses on
+user-facing production traffic across on-premises and cloud environments, networking,
+DNS, HTTP/HTTPS, high-performance load balancing such as HAProxy/Envoy/Traefik,
+Kubernetes, Python/Rust/Go, failure recovery and security. It also mentions rate
+limiting and DDoS mitigation as bonus areas.
+
+What a Proton SRE does in plain language:
+
+1. Makes infrastructure changes repeatable rather than clicking through servers.
+2. Keeps services available while hardware, networks and dependencies fail.
+3. Creates useful monitoring and alerts instead of dashboards no one trusts.
+4. Investigates incidents across application, network, OS and hardware layers.
+5. Improves security without making recovery impossible.
+6. Documents decisions so another engineer can operate the system.
+
+This is serious production responsibility. A beginner project can show learning ability
+and disciplined habits, but it cannot substitute for production experience.
+
+
+15. THE CURRENT LAB MAPPED TO PROTON
+-------------------------------------
+
+Current evidence:
+
+- C++ simulator: a hardware-like TCP endpoint and controlled fault state.
+- Python/FastAPI: polling, validation, REST endpoints and metrics.
+- Docker Compose: repeatable local multi-service deployment.
+- Prometheus/Grafana: metrics and dashboard evidence.
+- GitHub Actions: automated C++ build and Python tests.
+- Recovery drill: inject a failure, observe readiness, recover and verify a fresh sample.
+
+What it teaches that transfers:
+
+- health is different from useful readiness;
+- dependencies and network boundaries must be explicit;
+- failed work must be counted, not hidden;
+- recovery needs fresh evidence;
+- operators need a runbook and clear limits.
+
+What it does not prove:
+
+- thousands of servers;
+- Kubernetes production administration;
+- VMware or bare-metal fleet operations;
+- kernel tuning or high-performance load balancing;
+- Proton internal architecture or security controls;
+- independent on-call ownership;
+- work authorization or an offer.
+
+Truthful current CV wording:
+
+    Built a local hardware-aware reliability lab with C++, Python/FastAPI,
+    Docker Compose, Prometheus and Grafana; implemented a controlled fault and
+    recovery drill with automated tests and documented operational boundaries.
+
+Do not write "Site Reliability Engineer at Proton" or "production Kubernetes" unless
+those statements are actually true.
+
+
+16. A SENSIBLE SIX-WEEK LEARNING PLAN
+--------------------------------------
+
+Week 1 - vocabulary and baseline
+    Read Sections 1-8. Run the public lab. Draw the component and trust-boundary
+    diagram. Explain liveness, readiness, SLI and SLO aloud.
+    Done when: you can start, inspect, fault, recover and stop the local stack.
+
+Week 2 - Linux and one approved host
+    Ask the centre for a loaned/approved Linux VM, mini-PC or other host. Practise
+    processes, ports, routes, systemd and logs. Do not scan the office network.
+    Done when: the agent runs on an approved host and the boundary is recorded.
+
+Week 3 - Docker and Kubernetes basics
+    Review the image, use a non-root user, add probes and resource limits, and deploy
+    only to a disposable or centre-approved environment.
+    Done when: you can explain Pod, Deployment, Service, readiness and rollback.
+
+Week 4 - CI and security
+    Add tests, configuration validation, approved dependency/image scanning and an SBOM.
+    Record any unavailable scanner as UNKNOWN instead of inventing a pass.
+    Done when: a deliberately introduced safe issue is caught before deployment.
+
+Week 5 - observability and incident response
+    Define one SLO window. Add a useful alert or approved log search. Run three safe
+    failures and write timelines, impact, cause and prevention.
+    Done when: another person can find the failure from the evidence.
+
+Week 6 - restore, handover and applications
+    Test backup/restore. Present the five-minute demo. Score the skills matrix. Tailor
+    a CV to a real vacancy and check experience, nationality, language and authorization.
+    Done when: a second operator reproduces the runbook and every gap is listed.
+
+The centre request is specific: one approved host or VM, isolated lab network, one
+reviewer for one hour per week, and confirmation of available Kubernetes, GitLab,
+VMware/Hyper-V, logs and security tools. IP4IT's public pages do not by themselves
+guarantee a place, equipment, supervisor, paid placement or job conversion.
+
+
+17. WHAT CAN BECOME PAID WORK
+-----------------------------
+
+Do not start by advertising yourself as a senior SRE. A more sensible first package,
+after supervised practice, is:
+
+    Authorized non-production reliability review
+
+Possible deliverables:
+
+- reproducible Docker deployment;
+- architecture and trust-boundary diagram;
+- CI tests and approved security checks;
+- baseline dashboard and SLI/SLO worksheet;
+- one safe failure drill;
+- recovery runbook and handover note.
+
+Before accepting payment, confirm the user's Swiss work authorization, tax/contracting
+position, client scope and data handling. Never test or change a client system without
+written permission. This is a possible service shape, not guaranteed income.
+
+
+18. BEGINNER EXERCISES WITH ANSWERS
+------------------------------------
+
+Exercise 1
+Question: A process is running, but users receive errors. Is it healthy?
+Answer: It may be live but not ready. Check the user-relevant operation and its
+dependencies; do not equate a running process with useful service.
+
+Exercise 2
+Question: What is the difference between a metric and an alert?
+Answer: A metric is a measurement. An alert is a routed decision that a person or
+system needs to act. A metric can exist without an alert; an alert should link to
+evidence and a runbook.
+
+Exercise 3
+Question: One failed poll out of 23 occurs during a test. What is the availability?
+Answer: 22 / 23 = 95.652% for that short window. State the numerator, denominator and
+window; do not call it a production SLO result.
+
+Exercise 4
+Question: Why is a container not a VM?
+Answer: A container isolates a process while sharing the host kernel. A VM runs a guest
+operating system under a hypervisor and has a stronger machine boundary at higher cost.
+
+Exercise 5
+Question: What is readiness for?
+Answer: It tells a routing system whether the instance should receive useful traffic.
+It can fail while liveness remains healthy during a dependency failure.
+
+Exercise 6
+Question: What should happen when a secret is committed to Git?
+Answer: Stop propagation, revoke/rotate the secret, preserve appropriate evidence,
+remove it from future history through an approved process, and review access. Never
+publish or repeat the secret.
+
+Exercise 7
+Question: What is the first safe action during an incident?
+Answer: State the user impact and preserve evidence. Do not randomly restart every
+component because that can erase the cause and create more impact.
+
+Exercise 8
+Question: Does a six-week project make someone a senior SRE?
+Answer: No. It can produce early-career evidence: reproducible deployment, metrics,
+controlled incidents, security habits and handover. Seniority requires sustained
+production responsibility, judgment, incident history and scope.
+
+
+19. FIRST SESSION CHECKLIST
+---------------------------
+
+Do this on the Mac before asking for centre access:
+
+1. Open the repository.
+2. Run `make setup` and `make up`.
+3. Open the dashboard at http://localhost:8000.
+4. Run `make demo`.
+5. State the user impact when the device fault is injected.
+6. Inspect `/healthz`, `/readyz`, `/api/status` and `/metrics`.
+7. Explain the recovery evidence.
+8. Run `./scripts/verify.sh`.
+9. Record the result and remaining gap in the skills matrix.
+
+Definition of done: you can explain every current component without saying that a
+tool or skill is present merely because a guide names it.
+
+
+20. SOURCES AND VALIDITY BOUNDARIES
+------------------------------------
+
+Primary role sources checked 19 September 2026:
+
+- Proton SRE Infrastructure Systems:
+  https://job-boards.eu.greenhouse.io/proton/jobs/4848439101?gh_src=6b341c62teu
+- Proton SRE Application Edge:
+  https://job-boards.greenhouse.io/proton/jobs/4612377101
+- Proton careers:
+  https://proton.me/careers
+- CERN DevOps Engineer for Large Scale Compute:
+  https://careers.cern/jobs/devops-engineer-for-large-scale-compute/
+- CERN CMS DAQ software role:
+  https://careers.cern/jobs/ep-cms-tdq-2026-153-grap/
+- IP4IT:
+  https://www.ip4it.ch/
+- Geneva Business News IT:
+  https://genevabusinessnews.ch/it/
+- Google SRE book:
+  https://sre.google/sre-book/table-of-contents/
+
+Validity rules:
+
+- Employer requirements are current evidence about a role, not proof that the learner
+  has the skill.
+- A public project proves code and documentation are accessible, not production access.
+- A local Kubernetes cluster is not a production cluster.
+- A role labelled Geneva does not itself prove work authorization.
+- A training placement is not employment unless a real contract says so.
+- Recheck role status, deadline, eligibility, permit/activity authorization and centre
+  equipment immediately before acting.
+
+END OF GUIDE

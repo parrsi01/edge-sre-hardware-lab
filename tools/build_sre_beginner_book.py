@@ -85,9 +85,9 @@ def cover(canvas, doc):
     text = canvas.beginText(32 * mm, height - 94 * mm)
     text.setLeading(17)
     for line in (
-        "Build, operate, break and recover a small service",
+        "Learn the definitions, then operate, break and recover a small service",
         "using Linux, Python, C++, Docker, Prometheus and Grafana.",
-        "Designed for an in-person IP4IT / Geneva Business News lab.",
+        "Includes a validity-first Proton Geneva SRE role decoder.",
     ):
         text.textLine(line)
     canvas.drawText(text)
@@ -202,7 +202,7 @@ def build():
 
     story = [Spacer(1, 1), PageBreak()]
 
-    chapter(story, "0", "How to use this book", "Read Chapters 1-5 today, run the lab, then use one chapter per training session at IP4IT.", [
+    chapter(story, "0", "How to use this book", "Read Foundations, then Chapters 1-5, run the lab, and use the Proton chapter as a role target rather than a qualification claim.", [
         p("This book is written for your actual starting point: a completed computer-science master's degree, a distributed-systems foundation and user-reported exposure to Python, Linux, networking and full-stack development. Those are assets, but an employer needs observable proof that you can operate a service, not only build one."),
         p("The project is public at <link href='https://github.com/parrsi01/edge-sre-hardware-lab'>github.com/parrsi01/edge-sre-hardware-lab</link>. It runs locally on a Mac today. At IP4IT, the goal is to replace the simulated device with an approved physical Linux host and have another person reproduce your runbook."),
         table([
@@ -213,6 +213,33 @@ def build():
         ], [32*mm, 70*mm, 75*mm]),
         p("Truth rule", H2),
         p("The current system is a local simulation. Do not call it production, a data-centre deployment, FPGA work or CERN experience. The physical-host exercise becomes true only after it is completed and verified." , WARN),
+    ])
+
+    chapter(story, "F", "Foundations before tools", "Learn the words first. A sensible SRE design makes the service, evidence, risks and limits explicit.", [
+        p("This guide is not a tool checklist. DevOps, DevSecOps and SRE are ways of working. A product name such as Kubernetes, VMware or Terraform is useful only when you can explain what problem it solves, what can fail and how you would verify recovery."),
+        table([
+            ["Term", "Beginner definition", "Evidence in this project"],
+            ["Service", "A system that provides a useful function to a user or another system", "Device telemetry control plane and dashboard"],
+            ["Dependency", "A component required for useful work", "Device process, network and metrics path"],
+            ["Availability", "Successful intended operations divided by total intended operations in a stated window", "Poll success ratio during a drill"],
+            ["SLI", "A measured user-relevant indicator", "Successful polls divided by total polls"],
+            ["SLO", "A target for an SLI over a defined window", "Training target only; no external SLA"],
+            ["Observability", "Using signals to understand internal state", "Metrics, logs, readiness and dashboard"],
+            ["Incident", "An unplanned event that reduces or threatens expected service", "Controlled device fault"],
+            ["Runbook", "Steps for a known operational task or failure", "README and demo workflow"],
+            ["Toil", "Repetitive manual work with little lasting value", "Candidate for safe setup/verification automation"],
+        ], [31*mm, 76*mm, 62*mm]),
+        p("SRE in one sentence", H2),
+        p("SRE applies software engineering to operations: define reliability, measure it, automate safe repetition, respond to failure and learn from evidence."),
+        p("Validity rules", H2),
+        *bullets([
+            "A job description is evidence about an employer's needs, not evidence that the learner has the skill.",
+            "A local project proves local code and documentation, not production access, on-call history or seniority.",
+            "A named tool is not installed or mastered unless a dated, reproducible result shows it.",
+            "A training placement is not employment unless a real contract establishes employment.",
+            "A Geneva vacancy does not by itself prove that a non-EU/EFTA candidate may start work.",
+        ], SMALL),
+        exercise("What must be stated before writing '99% reliable'?", "Name the SLI, numerator, denominator, target, measurement window and user-relevant operation. For example: 'At least 99% of scheduled telemetry polls succeed during a 30-minute supervised drill.'"),
     ])
 
     chapter(story, "1", "What SRE actually is", "SRE is software engineering applied to operations: define reliability, measure it, automate repeatable work and learn from failure.", [
@@ -292,6 +319,36 @@ def build():
         ], [42*mm, 60*mm, 75*mm]),
         p("The supplied LinkedIn link resolves to CERN's official DevOps Engineer for Large Scale Compute role (IT-CD-CC-2026-223-GRAE), Geneva hybrid, closing 8 October 2026 at 23:59 Geneva time. The official page states a maximum of two years of professional experience since graduation, a Bachelor's or Master's degree, CERN Member/Associate Member nationality and no previous CERN fellow/graduate contract. Check those gates before applying."),
         exercise("What is today's money-first action?", "Run the existing demo, save the verification result, read this chapter aloud, and ask the centre for one approved host, network boundary and reviewer. A client or employer should see evidence of safe operation before you discuss a paid scope."),
+    ])
+
+    chapter(story, "P", "Proton SRE in Geneva: role decoder", "Understand the real production responsibility before comparing your beginner project with Proton's requirements.", [
+        p("Proton's official Site Reliability Engineer - Infrastructure Systems role is listed for Geneva and Paris. The Infrastructure Systems team provides base platforms including Kubernetes, VM orchestration and bare-metal provisioning, plus critical services such as DNS, DHCP, source of truth and monitoring. The description says the team operates thousands of servers, designs automation for 99.95%+ uptime and participates in on-call troubleshooting."),
+        p("What that means in plain language", H2),
+        table([
+            ["Employer wording", "Beginner translation"],
+            ["Kubernetes and VM orchestration", "Keep many application workloads scheduled, reachable, upgraded and recoverable across a cluster or virtual machines"],
+            ["Bare-metal provisioning", "Prepare and lifecycle-manage physical servers, not only containers"],
+            ["DNS, DHCP and source of truth", "Provide naming, network configuration and a trusted record of infrastructure state"],
+            ["99.95%+ uptime", "A very high target that requires measured error budgets, redundancy and disciplined change"],
+            ["On-call rotation", "A staffed response system with escalation, access, runbooks and post-incident learning"],
+            ["Linux internals and kernel tuning", "Understand processes, memory, filesystems, networking and resource behaviour below the application"],
+            ["Prometheus and Grafana", "Collect metrics, query them and show operators useful evidence"],
+        ], [48*mm, 121*mm]),
+        p("Proton Application Edge is related but distinct", H2),
+        p("The Application Edge role focuses on user-facing traffic across on-premises and cloud environments. It names TCP/IP, DNS, HTTP/HTTPS, high-performance load balancing such as HAProxy, Envoy or Traefik, Kubernetes, Python/Rust/Go, failure recovery and security. Rate limiting and DDoS mitigation are bonus areas. Do not merge this role with Infrastructure Systems: they overlap in reliability but have different technical centres of gravity."),
+        p("Your honest fit statement today", H2),
+        p("The current lab supports a beginner-level story about Python/C++, Docker, metrics, readiness, a controlled fault and recovery evidence. It does not yet prove Proton production Kubernetes, VMware, bare-metal fleet management, kernel tuning, global networking, on-call ownership or Proton internal systems. Use the role as a learning target, not as a claim about your current seniority." , WARN),
+        table([
+            ["Proton requirement", "Current project", "Smallest credible next proof"],
+            ["Python automation", "FastAPI polling and tests", "Write one reviewed operational script and explain failure handling"],
+            ["Prometheus/Grafana", "Metrics and dashboard", "Define one alert with owner, threshold and runbook"],
+            ["Linux/networking", "TCP boundary and local containers", "Operate the agent on an approved Linux host and diagnose one link/route fault"],
+            ["Kubernetes", "Compose service graph", "Deploy to an approved disposable namespace with probes and limits"],
+            ["IaC/configuration", "Documented setup", "Run a reviewable, idempotent Terraform/OpenTofu or Ansible plan"],
+            ["On-call/incident response", "Controlled local drill", "Three witnessed drills, timeline, RCA and handover"],
+        ], [43*mm, 58*mm, 68*mm]),
+        p("Proton is a selective employer and its official application asks about work authorization, location, salary expectations and direct reports. Answer those fields truthfully. The job page does not guarantee a Swiss permit, a junior route or a conversion from training." , WARN),
+        exercise("What would make a Proton-style project claim valid?", "A dated, reproducible artifact and observed result: for example, a deployment to an approved environment, a measured SLO, a witnessed incident recovery and a reviewer-confirmed runbook. A list of tools or an AI-generated explanation is not enough."),
     ])
 
     chapter(story, "2", "Your existing hardware and the one optional purchase", "Start with what is already connected. Only buy a physical host if IP4IT cannot lend one.", [

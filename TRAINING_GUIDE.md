@@ -34,6 +34,8 @@ The current Mac evidence is Docker/Compose, Python/FastAPI, C++, Prometheus/Graf
 
 The practical order is Linux/TCP/IP -> Docker -> Kubernetes/health probes -> CI/IaC -> Prometheus/Grafana/logs -> security gates -> incident response and handover. Read the role matrix and six-week definitions of done in the playbook before asking the centre for access.
 
+If you are starting from zero, read [PROTON_SRE_GENEVA_BEGINNER_GUIDE.txt](PROTON_SRE_GENEVA_BEGINNER_GUIDE.txt) first. It is the plain-text edition with definitions and worked beginner explanations. The companion [Proton Geneva PDF](docs/assets/PROTON_SRE_GENEVA_BEGINNER_GUIDE.pdf) focuses on Proton's official Infrastructure Systems and Application Edge role descriptions and labels every current-versus-missing evidence boundary.
+
 ## What you would work on each week
 
 | Week | Centre work | Public evidence | Definition of done |
