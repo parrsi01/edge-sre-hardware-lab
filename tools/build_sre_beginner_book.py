@@ -158,7 +158,11 @@ def exercise(question, answer):
 
 
 def table(rows, widths, header=True):
-    data = [[p(str(cell), SMALL) for cell in row] for row in rows]
+    header_style = ParagraphStyle("TableHeader", parent=SMALL, textColor=colors.white)
+    data = []
+    for row_index, row in enumerate(rows):
+        cell_style = header_style if header and row_index == 0 else SMALL
+        data.append([p(str(cell), cell_style) for cell in row])
     t = Table(data, colWidths=widths, repeatRows=1 if header else 0, hAlign="LEFT")
     commands = [
         ("GRID", (0, 0), (-1, -1), 0.45, LINE),
@@ -203,7 +207,7 @@ def build():
         p("The project is public at <link href='https://github.com/parrsi01/edge-sre-hardware-lab'>github.com/parrsi01/edge-sre-hardware-lab</link>. It runs locally on a Mac today. At IP4IT, the goal is to replace the simulated device with an approved physical Linux host and have another person reproduce your runbook."),
         table([
             ["Reading mode", "Action", "Definition of done"],
-            ["Today", "Chapters 1-5 and the five-minute demo", "You can explain each box and recover the injected fault"],
+            ["Today", "Chapters 1-5, D, E and the five-minute demo", "You can explain the stack, money boundary and recover the injected fault"],
             ["At IP4IT", "Chapters 6-17 with a supervisor", "Evidence is independently observed and recorded"],
             ["Applications", "Chapters 18-19", "Every CV claim points to a file, test or witnessed exercise"],
         ], [32*mm, 70*mm, 75*mm]),
@@ -239,6 +243,55 @@ def build():
         p("The 2025 ICT-Berufsbildung Schweiz study starts from about 266,000 ICT workers and projects 61,600 additional ICT positions through 2033 from economic growth and structural change. That is approximately 23.2% of the 2024 base across the forecast period, not an annual rate. It also projects 67,000 replacement needs, producing 128,600 gross personnel needs. The largest occupational components are software developers (46,200) and systems analysts (17,600)."),
         p("More than two-thirds of Swiss ICT specialists work outside the core ICT industry. This supports portable reliability skills for finance, education, public administration, life sciences, logistics and industry. It does not guarantee a vacancy, interview, permit or junior-level hire."),
         exercise("Can you write 'Geneva SRE jobs increased 23.2%' on a proposal?", "No. The 23.2% is a calculation from a national forecast of additional ICT positions through 2033 divided by the 2024 Swiss ICT workforce base. It is neither Geneva-specific, SRE-specific nor annual. Use the exact scope and period."),
+    ])
+
+    chapter(story, "D", "DevSecOps and the current Swiss SRE stack", "Use security controls inside delivery and reliability work, then prove the result with a safe lab exercise.", [
+        p("The supplied Proton, CERN, adesso, PostFinance and private-cloud descriptions repeat a practical stack: Linux and networking; Docker and Kubernetes; Terraform or OpenTofu; Ansible, Puppet or similar configuration management; Git and CI/CD; Prometheus/Grafana and logs; security controls; virtualization or bare metal; and incident response. The exact job postings differ, so this is a representative scan checked 19 September 2026, not an exhaustive inventory of every vacancy."),
+        table([
+            ["Capability", "Common tools", "Your evidence boundary"],
+            ["Linux and networking", "Linux, shell, TCP/IP, DNS, HTTP(S), processes, permissions, cgroups/namespaces", "Current container lab and TCP protocol; approved Linux host still needed"],
+            ["Containers", "Docker, Kubernetes, Helm, OpenShift", "Docker Compose is demonstrated; Kubernetes is a supervised next step"],
+            ["IaC and config", "Terraform/OpenTofu, Ansible, Puppet/OpenVox, Pulumi", "Documented deployment today; disposable-lab exercise next"],
+            ["CI/CD and GitOps", "Git, GitLab CI, GitHub Actions, Jenkins, ArgoCD", "GitHub Actions passes now; centre-approved GitLab/ArgoCD later"],
+            ["Observability", "Prometheus, Grafana, Alertmanager, ELK/Kibana, Splunk, logs/traces", "Prometheus/Grafana now; log platform only if approved"],
+            ["DevSecOps", "image/dependency scanning, SBOM, secret scanning, IAM/RBAC, policy, encryption", "Security boundary is documented; scanner gates are next"],
+            ["Virtualization", "VMware/Hyper-V, QEMU/KVM, bare metal, OpenStack, Talos", "Use the centre's approved host; do not claim vendor expertise yet"],
+            ["Reliability", "SLI/SLO, error budget, on-call, RCA, postmortem, backup/restore", "Controlled fault and recovery are already demonstrated"],
+        ], [37*mm, 66*mm, 74*mm]),
+        p("Minimum learning order", H2),
+        p("Learn the failure boundary before the product name: Linux/TCP/IP diagnosis, Docker image lifecycle, Kubernetes health probes and limits, Git-based CI, IaC idempotence, metrics/logs, least privilege and incident handover. Do not install every named tool at once. Complexity is not evidence."),
+        p("Mac versus centre", H2),
+        p("The Mac path uses Docker/Compose, Python/FastAPI, C++, Prometheus, Grafana and GitHub Actions. The centre path may provide VMware or Hyper-V, an approved Linux VM or physical host, Kubernetes, GitLab CI, Terraform/OpenTofu, Ansible/Puppet and a log platform. On Apple silicon, confirm the centre's supported VM architecture before promising nested Kubernetes or VMware. The approved environment matters more than the brand."),
+        exercise("Does mentioning Kubernetes, VMware or Terraform on a CV prove SRE ability?", "No. A truthful claim requires a reproducible deployment, a stated boundary, an observed failure and evidence of recovery or review. This guide labels centre-only tools as next-stage work until that evidence exists."),
+    ])
+
+    chapter(story, "E", "Secure Edge Platform: a six-week money-first project", "Present one narrow, supervised project that connects the current lab to the work employers buy and hire for.", [
+        p("Project outcome", H2),
+        p("Turn the existing edge lab into a Secure Edge Platform: a Dockerized, observable service with CI security gates, an approved Kubernetes or VM deployment, an explicit SLO, a controlled incident and a handover another operator can reproduce. This is a portfolio and training proposal. It is not a promise of a job, daily income, seniority, CERN experience or work authorization."),
+        code("Mac workstation\n  -> Docker/Compose baseline\n  -> approved VMware/Hyper-V Linux VM or physical host\n  -> Kubernetes namespace or centre-approved equivalent\n  -> GitHub/GitLab CI gates\n  -> Prometheus/Grafana and approved logs\n  -> SLO, incident record and restore evidence"),
+        table([
+            ["Week", "Work", "Evidence and definition of done"],
+            ["1 - baseline", "Rebuild the Mac lab; practise Linux/TCP diagnosis", "Clean clone, architecture diagram and verbal five-minute demo"],
+            ["2 - platform", "Review Docker image; model Kubernetes Deployment, Service, probes and limits", "Approved VM/cluster deployment or a reviewed, runnable manifest set"],
+            ["3 - delivery/security", "CI tests, config validation, approved image/dependency scan and SBOM", "Pipeline catches a deliberately introduced non-production issue"],
+            ["4 - observe/respond", "SLO window, alert reasoning, logs and three safe failures", "Timeline, impact, diagnosis, recovery and postmortem for each"],
+            ["5 - automate/recover", "Terraform/OpenTofu or Ansible/Puppet on disposable resources; restore", "Idempotent plan, separate restore and no secrets in Git"],
+            ["6 - handover", "Presentation, skills matrix, truthful CV bullet and fit-gated applications", "Second operator reproduces the runbook and gaps are explicit"],
+        ], [28*mm, 70*mm, 79*mm]),
+        p("Potential lawful service package", H2),
+        p("The first possible paid work is a bounded, authorized non-production reliability and secure-deployment review for a small organization, school lab or open-source project. Deliverables are a reproducible Docker/Kubernetes deployment, trust-boundary diagram, CI checks, baseline dashboard, SLI/SLO worksheet, one controlled failure drill, recovery runbook and handover note. Confirm Swiss work authorization, contracting and tax requirements before accepting payment. Never touch a client's system without written scope and authorization." , WARN),
+        p("Business-centre opening", H2),
+        p("\"I have a working hardware-aware reliability lab. It polls a C++ device, validates telemetry in Python, exposes metrics, detects a controlled fault and verifies recovery. I want to use one approved Linux VM or physical host here to add container security, a CI gate, an SLO and an independent handover. I am asking for a supervised six-week evidence project, not permission to touch production.\"", BOX),
+        p("Role mapping", H2),
+        table([
+            ["Current role evidence", "Repeated technology", "What this project supports / does not support"],
+            ["CERN DevOps Engineer for Large Scale Compute", "Linux, Python/Go, Git, Puppet/OpenVox, Ansible, Terraform/OpenTofu, containers, CI/CD, Kubernetes, OpenStack, HTCondor/SLURM", "Supports Linux/Python/Git/containers/CI story; does not yet prove fleet scale, Puppet/OpenVox, OpenStack, batch/HPC or eligibility"],
+            ["CERN CMS DAQ software", "Python, modern C++, REST/web UI, hardware interaction, CI/CD, VHDL/Verilog asset", "Supports software/operations foundation; does not prove FPGA, DAQ or accelerator work"],
+            ["Proton and private-cloud SRE", "Kubernetes, VMs/bare metal, Linux, Terraform/Ansible/Puppet, Prometheus/Grafana, networking", "Supports the vocabulary and a small recovery demo; production/on-call scale remains unknown"],
+            ["adesso/PostFinance platform roles", "Cloud/hybrid, GitLab/Jenkins, Docker/Kubernetes, IaC, logs, GitOps, security", "Supports a staged learning plan; seniority, language, location and experience gates remain"],
+        ], [42*mm, 60*mm, 75*mm]),
+        p("The supplied LinkedIn link resolves to CERN's official DevOps Engineer for Large Scale Compute role (IT-CD-CC-2026-223-GRAE), Geneva hybrid, closing 8 October 2026 at 23:59 Geneva time. The official page states a maximum of two years of professional experience since graduation, a Bachelor's or Master's degree, CERN Member/Associate Member nationality and no previous CERN fellow/graduate contract. Check those gates before applying."),
+        exercise("What is today's money-first action?", "Run the existing demo, save the verification result, read this chapter aloud, and ask the centre for one approved host, network boundary and reviewer. A client or employer should see evidence of safe operation before you discuss a paid scope."),
     ])
 
     chapter(story, "2", "Your existing hardware and the one optional purchase", "Start with what is already connected. Only buy a physical host if IP4IT cannot lend one.", [
@@ -564,6 +617,11 @@ def build():
             "Prometheus, <link href='https://prometheus.io/docs/practices/instrumentation/'>Instrumentation best practices</link>: attempts, errors, latency, metric types and label-cardinality cautions.",
             "Raspberry Pi, <link href='https://www.raspberrypi.com/documentation/computers/getting-started.html'>Getting started</link> and <link href='https://www.raspberrypi.com/documentation/computers/remote-access.html'>remote access</link>: boot media, network and SSH setup.",
             "Geneva Business News, <link href='https://genevabusinessnews.ch/it/'>IT programme page</link>: support/dev/system/network practice, labs and named tools.",
+            "CERN, <link href='https://careers.cern/jobs/devops-engineer-for-large-scale-compute/'>DevOps Engineer for Large Scale Compute</link>: current Geneva early-career stack, deadline and eligibility gates.",
+            "CERN, <link href='https://careers.cern/jobs/ep-cms-tdq-2026-153-grap/'>Online Software Developer / CMS DAQ</link>: Python, C++, hardware interaction and CI/CD requirements.",
+            "Proton, <link href='https://job-boards.eu.greenhouse.io/proton/jobs/4848439101?gh_src=6b341c62teu'>SRE Infrastructure Systems</link> and <link href='https://job-boards.greenhouse.io/proton/jobs/4612377101'>SRE Application Edge</link>: Kubernetes, Linux, networking, IaC and observability.",
+            "adesso, <link href='https://www.adesso.ch/de_ch/jobs-karriere/unsere-stellenangebote/Senior-Site-Reliability-Engineer-all-genders-de-j2900.html'>Senior SRE</link>: Swiss DevOps/SRE stack and seniority boundary.",
+            "PostFinance, <link href='https://jobs.postfinance.ch/offene-stellen/product-owner-continuous-integration-plattformen-w-m-d/4c9a3fca-6325-4494-86e5-19452b333564'>CI platform role</link>: current GitLab, observability, IaC and cloud-native evidence.",
             "OCSTAT, <link href='https://statistique.ge.ch/actualites/welcome.asp?Actudomaine=06_02&amp;aaaa1=2026&amp;aaaa2=2026&amp;actu=6016&amp;mm1=05/01&amp;mm2=12/31&amp;num=0'>Geneva employment Q2 2026 and detailed 2024 results</link>.",
             "ICT-Berufsbildung Schweiz, <link href='https://www.ict-berufsbildung.ch/resources/BSS-Schlussbericht-ICT-Bildungsbedarf-2033-2025-09_09.pdf'>ICT workforce requirements through 2033</link>: national cross-industry forecast, not a Geneva vacancy count.",
         ], SMALL),

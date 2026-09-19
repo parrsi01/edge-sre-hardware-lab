@@ -15,5 +15,13 @@ Use only these states: `NOT STARTED`, `RESEARCHED`, `READY`, `IN PROGRESS`, `BLO
 | Security review | READY | Localhost defaults and `SECURITY.md` | Supervisor review | Exposure, privileges, data and secrets approved |
 | Backup and restore | NOT STARTED | Procedure documented | Separate approved destination | Restored copy passes verification |
 | Independent handover | NOT STARTED | Public guide prepared | Second operator | Another person succeeds and gaps are recorded |
+| Docker image lifecycle | READY | Compose build and health checks | Review image as a non-root, minimal runtime | Image review and repeatable build are recorded |
+| Kubernetes fundamentals | NOT STARTED | Compose service graph and guide | Approved cluster or disposable centre VM | Deployment, Service, probes, limits and rollback are demonstrated |
+| GitLab CI / GitOps | RESEARCHED | GitHub Actions pipeline | Centre-approved GitLab/ArgoCD exercise | A reviewed change passes gates and can be rolled back |
+| Infrastructure as Code | NOT STARTED | Deployment steps documented | Terraform/OpenTofu or Ansible/Puppet on disposable resources | Plan is reviewable, idempotent and leaves no secret in Git |
+| DevSecOps gates | READY | Localhost boundary and security guide | Approved image/dependency scan, SBOM and secret check | Failing demo issue is caught before deployment |
+| Log correlation | NOT STARTED | API logs and Prometheus metrics | Centre-approved ELK/Kibana/Splunk or equivalent | One incident is found from correlated logs and metrics |
+| Virtualization | NOT STARTED | Hypervisor-agnostic design | Approved VMware/Hyper-V/QEMU/KVM lab | VM lifecycle and resource boundary are explained and tested |
+| CERN large-scale stack | RESEARCHED | Current role matrix in playbook | Supervised Puppet/OpenVox/OpenStack/batch exercise if available | Tool-specific evidence is witnessed; no borrowed claims |
 
 The repository proves code and local operation. Rows remain `NOT STARTED` until physical or independent evidence actually exists.

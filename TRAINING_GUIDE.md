@@ -26,6 +26,14 @@ An SRE applies software engineering to operations. In this project, that means y
 
 This is a **proposed supervised project**, not a statement that IP4IT currently employs SREs.
 
+## DevSecOps/SRE extension: Secure Edge Platform
+
+The [DevSecOps/SRE Playbook](DEVSECOPS_SRE_PLAYBOOK.md) adds a second, employment-facing layer to this project. The immediate money-first capability is a bounded, authorized non-production reliability and secure-deployment review: reproduce a Docker deployment, add CI checks, document an SLO, run one controlled failure, and hand over a runbook. It is a potential service package, not guaranteed income and not permission to work without Swiss authorization or a client agreement.
+
+The current Mac evidence is Docker/Compose, Python/FastAPI, C++, Prometheus/Grafana, GitHub Actions, Linux/networking fundamentals and a recovery drill. A supervised centre extension may use VMware/Hyper-V, an approved Linux VM or host, Kubernetes, GitLab CI, Terraform/OpenTofu, Ansible/Puppet, a log platform and approved image/dependency scanners. These are **next-stage tools**, not claims that they are installed or mastered on this Mac.
+
+The practical order is Linux/TCP/IP -> Docker -> Kubernetes/health probes -> CI/IaC -> Prometheus/Grafana/logs -> security gates -> incident response and handover. Read the role matrix and six-week definitions of done in the playbook before asking the centre for access.
+
 ## What you would work on each week
 
 | Week | Centre work | Public evidence | Definition of done |
