@@ -1,0 +1,30 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and self-test C++ device
+        run: |
+          cmake -S device-simulator -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ./build/device-simulator --self-test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test Python control plane
+        run: |
+          python -m pip install -r control-api/requirements.txt
+          cd control-api
+          pytest -q
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+

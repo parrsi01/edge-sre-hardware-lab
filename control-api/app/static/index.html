@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hardware-aware SRE demonstration: C++ device, Python control plane, monitoring and fault recovery.">
+  <title>Edge SRE Hardware Lab</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">LIVE RELIABILITY LAB</p>
+        <h1>Edge node control plane</h1>
+        <p class="subtitle">C++ device interaction · Python API · observable recovery</p>
+      </div>
+      <div id="live-pill" class="pill unknown"><span></span><b>Connecting</b></div>
+    </header>
+
+    <section class="grid metrics" aria-label="Current system metrics">
+      <article class="card"><p>Availability</p><strong id="availability">--</strong><small>Target 99.0%</small></article>
+      <article class="card"><p>Temperature</p><strong id="temperature">--</strong><small>Device telemetry</small></article>
+      <article class="card"><p>Voltage</p><strong id="voltage">--</strong><small>Simulated rail</small></article>
+      <article class="card"><p>Samples</p><strong id="samples">0</strong><small>Rolling window</small></article>
+    </section>
+
+    <section class="grid body-grid">
+      <article class="card chart-card">
+        <div class="section-title">
+          <div><p>Telemetry</p><h2>Temperature trend</h2></div>
+          <span id="sequence" class="tag">Sequence --</span>
+        </div>
+        <canvas id="chart" width="900" height="300" aria-label="Recent temperature readings"></canvas>
+      </article>
+
+      <article class="card incident-card">
+        <p>Controlled failure</p>
+        <h2>Incident drill</h2>
+        <p class="copy">Inject a safe device fault, observe readiness and metrics, then restore service.</p>
+        <div class="buttons">
+          <button id="inject" class="danger">Inject fault</button>
+          <button id="recover">Recover device</button>
+        </div>
+        <div class="timeline">
+          <div><span>1</span><p>Fault command</p></div>
+          <div><span>2</span><p>Alert visible</p></div>
+          <div><span>3</span><p>Service restored</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid evidence">
+      <article class="card">
+        <p>Architecture</p><h2>Inspect every layer</h2>
+        <ol>
+          <li><b>C++ device</b><span>TCP protocol and fault state</span></li>
+          <li><b>Python control plane</b><span>Polling, validation and REST</span></li>
+          <li><b>Prometheus</b><span>Metrics and SLO evidence</span></li>
+          <li><b>Grafana</b><span>Operational dashboard</span></li>
+        </ol>
+      </article>
+      <article class="card">
+        <p>Operator view</p><h2>Current condition</h2>
+        <pre id="operator-log">Waiting for first reading…</pre>
+        <nav>
+          <a href="/docs" target="_blank">API docs</a>
+          <a href="http://localhost:9090" target="_blank">Prometheus</a>
+          <a href="http://localhost:3000/d/edge-sre-lab" target="_blank">Grafana</a>
+        </nav>
+      </article>
+    </section>
+  </main>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
+

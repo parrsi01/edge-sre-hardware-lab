@@ -1,0 +1,20 @@
+[Unit]
+Description=Edge SRE Lab hardware agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=edge-agent
+Group=edge-agent
+Environment=EDGE_DEVICE_ID=business-centre-node-01
+ExecStart=/usr/bin/python3 /opt/edge-sre-lab/edge_agent.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

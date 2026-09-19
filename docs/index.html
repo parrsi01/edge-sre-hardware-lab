@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Edge SRE Hardware Lab: C++, Python, Linux, observability, incident response and a six-week Geneva training plan.">
+  <title>Edge SRE Hardware Lab · Simon Parris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <nav>
+      <b>EDGE SRE LAB</b>
+      <a href="#system">System</a>
+      <a href="#training">Training</a>
+      <a href="#market">Evidence</a>
+      <a href="https://github.com/parrsi01/edge-sre-hardware-lab">GitHub</a>
+    </nav>
+
+    <header>
+      <p class="kicker">HARDWARE-AWARE RELIABILITY ENGINEERING</p>
+      <h1>A device fails.<br>The system explains why.</h1>
+      <p class="lead">A reproducible lab connecting a C++ device, Python control plane, live telemetry, automated tests and an observable recovery workflow—with a supervised six-week path from Mac simulation to an approved Linux host.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/parrsi01/edge-sre-hardware-lab">View repository</a>
+        <a class="button" href="assets/SRE_BEGINNER_GUIDE_IP4IT_GENEVA.pdf">Read the PDF guide</a>
+      </div>
+      <div class="badges"><span>C++20</span><span>Python</span><span>Linux</span><span>Prometheus</span><span>Grafana</span><span>Docker</span><span>CI</span></div>
+    </header>
+
+    <section id="system" class="two">
+      <article><p class="number">01</p><h2>Hardware boundary</h2><p>A documented TCP protocol separates device behaviour from the control plane. The simulator can be replaced by an approved Linux host without rewriting the application.</p></article>
+      <article><p class="number">02</p><h2>Reliability evidence</h2><p>Health and readiness differ, poll outcomes become metrics, invalid telemetry fails closed, and a controlled fault produces an inspectable incident.</p></article>
+      <article><p class="number">03</p><h2>Operational interface</h2><p>The dashboard shows live telemetry, availability and recovery. Prometheus and Grafana expose the underlying evidence.</p></article>
+      <article><p class="number">04</p><h2>Reproducible delivery</h2><p>Docker Compose starts the complete stack. CI compiles the C++ component, runs Python tests and validates deployment configuration.</p></article>
+    </section>
+
+    <section class="architecture">
+      <p class="kicker">SYSTEM PATH</p>
+      <div class="flow"><b>C++ device</b><i>TCP</i><b>Python API</b><i>metrics</i><b>Prometheus</b><i>view</i><b>Grafana</b></div>
+    </section>
+
+    <section id="training" class="training">
+      <p class="kicker">PROPOSED IP4IT / GENEVA BUSINESS NEWS TRAINING</p>
+      <h2>Six weeks. One physical host. Inspectable proof.</h2>
+      <div class="weeks">
+        <article><b>Week 1</b><span>Baseline</span><p>Rebuild, test and explain the Mac stack.</p></article>
+        <article><b>Week 2</b><span>Linux host</span><p>Deploy the agent as a restricted systemd service.</p></article>
+        <article><b>Week 3</b><span>Incidents</span><p>Run and document three approved failures.</p></article>
+        <article><b>Week 4</b><span>Security</span><p>Review exposure, privileges, data and secrets.</p></article>
+        <article><b>Week 5</b><span>SLO + restore</span><p>Measure reliability and prove recovery.</p></article>
+        <article><b>Week 6</b><span>Handover</span><p>Another operator reproduces the runbook.</p></article>
+      </div>
+      <p class="note">IP4IT’s public material supports practice across support, development, systems and networking. It does not advertise a guaranteed SRE role, device, paid placement or job conversion. Those points require direct confirmation.</p>
+    </section>
+
+    <section id="market" class="market">
+      <div>
+        <p class="kicker">EMPLOYMENT EVIDENCE</p>
+        <h2>Useful direction, not a guarantee.</h2>
+        <p>Geneva FTE employment grew <strong>0.8%</strong> in 2024 and <strong>1.0%</strong> quarter-on-quarter in Q2 2026. But the local information-and-communication branch fell <strong>1.7%</strong> in 2024, so there is no evidence-backed “Geneva SRE boom” claim.</p>
+      </div>
+      <div class="stat"><strong>61,600</strong><span>additional Swiss ICT positions projected through 2033</span><small>National cross-industry forecast, not current Geneva vacancies.</small></div>
+    </section>
+
+    <section class="demo">
+      <div><p class="kicker">FIVE-MINUTE DEMO</p><h2>Observe, fail, recover.</h2></div>
+      <ol><li>Show fresh healthy telemetry.</li><li>Inject the controlled fault.</li><li>Explain liveness versus readiness.</li><li>Inspect logs and failed polls.</li><li>Recover and verify a new sample.</li></ol>
+    </section>
+
+    <section class="resources">
+      <p class="kicker">READ AND VERIFY</p>
+      <div class="resource-grid">
+        <a href="assets/SRE_BEGINNER_GUIDE_IP4IT_GENEVA.pdf"><b>Illustrated SRE guide</b><span>Concepts, project, exercises, worked answers and six-week plan.</span></a>
+        <a href="https://github.com/parrsi01/edge-sre-hardware-lab/blob/main/TRAINING_GUIDE.md"><b>Training guide</b><span>Daily work, employment evidence, meeting script and definitions of done.</span></a>
+        <a href="https://github.com/parrsi01/edge-sre-hardware-lab/blob/main/SKILLS_MATRIX.md"><b>Skills matrix</b><span>What is proved, what is prepared and what still needs supervision.</span></a>
+        <a href="https://github.com/parrsi01/edge-sre-hardware-lab/blob/main/SECURITY.md"><b>Security boundary</b><span>Authorized lab use, safe defaults and physical-host controls.</span></a>
+      </div>
+    </section>
+
+    <section class="truth"><b>Evidence boundary</b><p>The current demonstration uses a C++ simulator and local containers. Physical-host, production, FPGA, data-centre and CERN experience are claimed only after supervised work provides that evidence. A project cannot guarantee employment or work authorization.</p></section>
+    <footer><span>Simon Parris · Geneva</span><span>Sources checked 19 September 2026</span></footer>
+  </main>
+</body>
+</html>
