@@ -11,13 +11,13 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build and self-test C++ device
         run: |
           cmake -S device-simulator -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --parallel
           ./build/device-simulator --self-test
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Test Python control plane
